@@ -31,3 +31,23 @@ so, the client will reload the page.
 
 By default, the webserver that runs this app has the `livereload` option
 enabled, so use it!
+
+## Going Forward
+
+Drop a `css`, `img`, `assets`, whatever directory in `public` and put things in
+them. There's no magic involved in building out our `.html` files, so you'll
+have to add the appropriate markup (in your `index.html` file, or wherever)
+to reference your various static assets.
+
+Add more javascript and css dependencies in the `vendor/js` and `vendor/css`
+directories, and gulp will copy them over.  If they don't copy right when you
+drop them in, restart the gulp process.
+
+This boilerplate places your app files in the `public/app` directory. See this
+line:
+
+    <script>$.cognition.init($("#cog-root"), "/app/index.html");</script>
+
+After loading in cognition, the `cognition.init()` method takes a jQuery selector
+and a path.  The path, that second arg, references the app's entry point, the
+first ancestor cog, the genesis cog, the progenitor.
