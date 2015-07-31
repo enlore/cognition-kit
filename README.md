@@ -6,7 +6,7 @@ Doing Occam proud.
 ## Use It
 
 Download the [latest release](https://github.com/enlore/cognition-vanilla/releases).
-Unzip it, and move down into it's directory.
+Unzip it, and move down into its newly created directory.
 
 Then, from a shell/command prompt opened up in that same dir:
 
