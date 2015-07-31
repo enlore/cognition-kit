@@ -5,6 +5,11 @@ Doing Occam proud.
 
 ## Use It
 
+Download the [latest release](https://github.com/enlore/cognition-vanilla/releases).
+Unzip it, and move down into it's directory.
+
+Then, from a shell/command prompt opened up in that same dir:
+
     npm install
     gulp
 
