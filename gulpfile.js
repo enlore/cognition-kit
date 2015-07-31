@@ -20,7 +20,10 @@ var webServerConfig = {
   //, proxies: []
 };
 
-gulp.task("default", ["vendorJs", "vendorCss", "serve"], function () {});
+gulp.task("default", ["vendorJs", "vendorCss", "serve"], function () {
+    gulp.watch("vendor/js/**/*.js", ["vendorJs"]);
+    gulp.watch("vendor/css/**/*.css", ["vendorCss"]);
+});
 
 /*
  * This task kicks off the webserver. Change the options above to
