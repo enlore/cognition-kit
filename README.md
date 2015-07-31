@@ -48,11 +48,11 @@ Add more javascript and css dependencies in the `vendor/js` and `vendor/css`
 directories, and gulp will copy them over.  If they don't copy right when you
 drop them in, restart the gulp process.
 
-This boilerplate places your app files in the `public/app` directory. See this
+This boilerplate places your app files (cogs) in the `public/app` directory. See this
 line:
 
     <script>$.cognition.init($("#cog-root"), "/app/index.html");</script>
 
-After loading in cognition, the `cognition.init()` method takes a jQuery selector
+After loading in cognition, the `cognition.init()` method takes a jQuery selection
 and a path.  The path, that second arg, references the app's entry point, the
 first ancestor cog, the genesis cog, the progenitor.
