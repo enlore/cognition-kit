@@ -40,7 +40,7 @@ enabled, so use it!
 ## Going Forward
 
 Drop a `css`, `img`, `assets`, whatever directory in `public` and put things in
-them. There's no magic involved in building out our `.html` files, so you'll
+them. There's no magic involved in building out the `.html` files, so you'll
 have to add the appropriate markup (in your `index.html` file, or wherever)
 to reference your various static assets.
 
