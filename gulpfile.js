@@ -1,9 +1,10 @@
+"use strict";
 /* jshint laxcomma: true */
 require("colors");
 var gulp          = require("gulp");
 var gChmod        = require("gulp-chmod");
 var gWeb          = require("gulp-connect");
-//var gIf           = require("gulp-if")
+//var gIf           = require("gulp-if");
 
 const config = {
     permissionBits: 664,
