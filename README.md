@@ -8,6 +8,8 @@ Doing Occam proud.
 Download the [latest release](https://github.com/enlore/cognition-vanilla/releases).
 Unzip it, and move down into its newly created directory.
 
+__Of note: I'll be automating the process of pulling the most recent cognition soon.__
+
 Then, from a shell/command prompt opened up in that same dir:
 
     # if you haven't already, install gulp globally
