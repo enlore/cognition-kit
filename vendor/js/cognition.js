@@ -1,9 +1,29 @@
 ;(function($) {
 
+    /**
+     * cognition.js (v1.0.3)
+     *
+     * Copyright (c) 2015 Scott Southworth, Landon Barnickle & Contributors
+     *
+     * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this
+     * file except in compliance with the License. You may obtain a copy of the License at:
+     * http://www.apache.org/licenses/LICENSE-2.0
+     *
+     * Unless required by applicable law or agreed to in writing, software distributed under
+     * the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
+     * ANY KIND, either express or implied. See the License for the specific language
+     * governing permissions and limitations under the License.
+     *
+     * @authors Scott Southworth @DarkMarmot, Landon Barnickle @landonbar
+     *
+     */
     "use strict";
     var ndash = $.ndash = $.cognition = {};
     var bus = ndash.bus = $.catbus = catbus;
     var uid = 0;
+
+    var COG_ROOT = bus.demandTree('COG_ROOT');
+    var ALIAS_ROOT= bus.demandTree('ALIAS_ROOT');
 
     var buildNum = 'NEED_BUILD_NUM';
 
@@ -32,28 +52,23 @@
     var ERROR = 'error';
     var BOOLEAN = 'bool';
     var OBJECT = 'object';
+    var READ = 'read';
 
     // the value attribute of of a data tag can be preceded by one of these:
     var DATA_VALUE_TYPE_HASH = {
 
-        d: DATA,
         data: DATA,
-        n: NUMBER,
         num: NUMBER,
         number: NUMBER,
-        p: PROP,
         prop: PROP,
         c: CONFIG,
         config: CONFIG,
-        b: BOOLEAN,
         bool: BOOLEAN,
         boolean: BOOLEAN,
-        s: STRING,
         string: STRING,
-        r: RUN,
         run: RUN,
-        e: ERROR,
-        error: ERROR
+        error: ERROR,
+        read: READ
 
     };
 
@@ -112,8 +127,8 @@
 
         tryToDownload(resolvedUrl);
 
-        var cogDownloadStatus = cogDownloadMap[resolvedUrl] = bus.at("n-cog:" + resolvedUrl);
-        var fileStatus = bus.at("n-url:" + resolvedUrl);
+        var cogDownloadStatus = cogDownloadMap[resolvedUrl] = bus.location("n-cog:" + resolvedUrl);
+        var fileStatus = bus.location("n-url:" + resolvedUrl);
         fileStatus.on('done').transform(true).pipe(cogDownloadStatus).once().autorun();
 
     }
@@ -156,6 +171,26 @@
     ndash.init = function (sel, url){
 
         var root = ndash.root = new MapItem();
+        root.aliasZone = ALIAS_ROOT;
+        root.cogZone = COG_ROOT;
+
+
+        bus.defineDeepLinker('lzs', function(dir){ return LZString.compressToEncodedURIComponent(JSON.stringify(dir))},
+            function(str){ return JSON.parse(LZString.decompressFromEncodedURIComponent(str))});
+        bus.setDeepLinker('lzs');
+
+        var directions = bus.resolveDirections(window.location.search);
+        if(directions)
+            COG_ROOT.demandData('__DIRECTIONS__').write(directions);
+
+        //COG_ROOT.demandData('__DIRECTIONS__').write(
+        //    {
+        //        activeSite: {update: 'eis'},
+        //        //'eis.vendor':{update: 'antk'},
+        //        filterList: {update: [{name: "vendor", optionId: "abcw"}]}
+        //
+        //    });
+
         root.localSel = sel;
         root.createCog({url:url});
 
@@ -173,6 +208,7 @@
         }
 
         bus.dropHost(mapItem.uid);
+        mapItem.cogZone.drop();
 
         if(!mapItem.scriptData)
         {
@@ -242,13 +278,18 @@
     function stringToStringArray(str){
 
         var arr = str.split(',');
+
         for(var i = arr.length - 1; i >= 0; i--){
-            arr[i] = arr[i].trim();
-            if(!arr[i])
+            var chunk = arr[i];
+            var trimmed_chunk = chunk.trim();
+            if(!trimmed_chunk)
                 arr.splice(i, 1);
+            else if(trimmed_chunk.length !== chunk.length)
+                arr.splice(i, 1, trimmed_chunk);
         }
 
         return arr;
+
     }
 
 
@@ -263,14 +304,72 @@
         return undefined;
     }
 
+
+    function extractCommandDef(sel){
+
+        var d = {
+
+            name: extractString(sel, 'name'),
+            pipe: extractString(sel, 'pipe'),
+            filter: extractString(sel, 'filter'),
+            topic: extractString(sel, 'on', 'update'),
+            run: extractString(sel, 'run'),
+            emit: extractString(sel, 'emit'),
+            emitPresent: extractHasAttr(sel, 'emit'),
+            emitType: null,
+            once: extractBool(sel, 'once'),
+            change: extractBool(sel, 'change', false),
+            extract: extractString(sel, 'extract'),
+            transform: extractString(sel, 'transform'),
+            transformPresent: extractHasAttr(sel, 'transform'),
+            transformType: null,
+            adapt: extractString(sel, 'adapt'),
+            adaptPresent: extractHasAttr(sel, 'adapt'),
+            adaptType: null,
+            autorun: false,
+            batch: extractBool(sel, 'batch'),
+            keep: 'last', // first, all, or last
+            need: extractStringArray(sel, 'need'),
+            gather: extractStringArray(sel, 'gather'),
+            defer: extractBool(sel, 'defer')
+
+        };
+
+        d.watch = [d.name];
+
+        // gather needs and cmd -- only trigger on cmd
+        if(d.gather.length || d.need.length) {
+            d.gather.push(d.name);
+
+            for (var i = 0; i < d.need.length; i++) {
+                var need = d.need[i];
+                if (d.gather.indexOf(need) === -1)
+                    d.gather.push(need);
+            }
+        }
+
+        d.batch = d.batch || d.run;
+        d.group = d.batch; // todo make new things to avoid grouping and batching with positive statements
+        d.retain = d.group;
+
+        applyFieldType(d, 'transform', PROP);
+        applyFieldType(d, 'emit', STRING);
+        applyFieldType(d, 'adapt', PROP);
+
+        return d;
+
+    }
+
+
     function extractSensorDef(sel){
 
         var d = {
 
             // add by('tag') default -- or topic, or name, or index
-            // add index('field') -- for by() method
+            // add index('field') -- for by() method -- or group(function(msg, topic, tag) return string?
 
             name: extractString(sel, 'data'),
+            cmd: extractString(sel, 'cmd'),
             watch: extractStringArray(sel, 'watch'),
             detect: extractString(sel, 'detect'),
             data: extractString(sel, 'data'),
@@ -280,32 +379,66 @@
             where: extractString(sel, 'where', 'first'),
             thing: extractString(sel, 'is', 'data'), // data, feed, service
             pipe: extractString(sel, 'pipe'),
+            demand: extractString(sel, 'demand'),
             pipeWhere: extractString(sel, 'pipeWhere', 'first'), // first, last, local, outer -- todo switch to prop based
             filter: extractString(sel, 'filter'),
             topic: extractString(sel, 'for,on,topic', 'update'),
             run: extractString(sel, 'run'),
+            emit: extractString(sel, 'emit'),
+            emitPresent: extractHasAttr(sel, 'emit'),
+            emitType: null,
             once: extractBool(sel, 'once'),
             retain: extractBool(sel, 'retain'),
+            group: extractBool(sel, 'group'),
             change: extractBool(sel, 'change,distinct,skipDupes', false),
+            extract: extractString(sel, 'extract'),
             transform: extractString(sel, 'transform'),
             transformPresent: extractHasAttr(sel, 'transform'),
+            transformType: null,
+            adapt: extractString(sel, 'adapt'),
+            adaptPresent: extractHasAttr(sel, 'adapt'),
+            adaptType: null,
             autorun: extractBool(sel, 'now,auto,autorun'),
             batch: extractBool(sel, 'batch'),
             keep: extractString(sel, 'keep', 'last'), // first, all, or last
             need: extractStringArray(sel, 'need,needs'),
+            gather: extractStringArray(sel, 'gather'),
             defer: extractBool(sel, 'defer')
 
         };
 
-        for(var i = 0; i < d.need.length; i++){
+        var i;
+
+        // add needs to the watch
+        for(i = 0; i < d.need.length; i++){
             var need = d.need[i];
             if(d.watch.indexOf(need) === -1)
                 d.watch.push(need);
         }
 
-        d.batch = d.batch || (d.watch.length > 1); // todo -- allow multiples without batching?
+        // add cmd to the watch list
+        if(d.cmd && d.watch.indexOf(d.cmd) === -1)
+            d.watch.push(d.cmd);
 
-        applyFieldType(d, 'transform');
+        // add watches to the gathering -- if gathering
+        if(d.gather.length > 0) {
+            for (i = 0; i < d.watch.length; i++) {
+                var watch = d.watch[i];
+                if (d.gather.indexOf(watch) === -1)
+                    d.gather.push(watch);
+            }
+        }
+
+        if(!d.find)
+            d.autorun = true;
+
+        d.batch = d.batch || (d.watch.length > 1) || d.run; // todo -- allow multiples without batching?
+        d.group = d.batch; // todo make new things to avoid grouping and batching with positive statements
+        d.retain = d.group;
+
+        applyFieldType(d, 'transform', PROP);
+        applyFieldType(d, 'emit', STRING);
+        applyFieldType(d, 'adapt', PROP);
 
         return d;
 
@@ -365,6 +498,7 @@
             url: extractString(sel, 'url'),
             path: extractString(sel, 'path'),
             name: extractString(sel, 'name'),
+            isRoute: extractBool(sel, 'route'),
             isWire: true
         };
     }
@@ -373,6 +507,7 @@
 
         var def = {
             name: extractString(sel, 'name'),
+            isRoute: extractBool(sel, "route"),
             url: extractString(sel, 'url'),
             path: extractString(sel, 'path'),
             isAlloy: true
@@ -414,8 +549,10 @@
     function extractCogDef(sel){
 
         var d = {
+
             path: extractString(sel, "path"),
-            name: extractString(sel, "name", 'cog'),
+            name: extractString(sel, "name"),
+            isRoute: extractBool(sel, "route"),
             url: extractString(sel, "url"),
             source: extractString(sel, 'use') || extractString(sel, 'from,source'),
             item: extractString(sel, 'make') || extractString(sel, 'to,item','cog'),
@@ -437,7 +574,8 @@
 
         var d = {
             path: extractString(sel, "path"),
-            name: extractString(sel, "name", 'chain'),
+            name: extractString(sel, "name"),
+            isRoute: extractBool(sel, "route"),
             url: extractString(sel, "url"),
             prop: extractBool(sel, 'prop'),
             source: extractString(sel, "from,source"),
@@ -446,7 +584,7 @@
             build: extractString(sel, 'build', 'append'), // scratch, append, sort
             order: extractBool(sel, 'order'), // will use flex order css
             depth: extractBool(sel, 'depth'), // will use z-index
-            target: extractString(sel, "id,find")
+            target: extractString(sel, "node,id,find")
 
         };
 
@@ -478,11 +616,18 @@
         var d = {
             name: extractString(sel, 'name'),
             inherit: extractBool(sel, 'inherit'),
+            isRoute: extractBool(sel, 'route'),
             value: extractString(sel, 'value'),
             valueType: null,
+            adapt: extractString(sel, 'adapt'),
+            adaptType: null,
+            adaptPresent: extractHasAttr(sel, 'adapt'),
             service: extractString(sel, 'service'),
             serviceType: null,
             servicePresent: extractHasAttr(sel, 'service'),
+            params: extractString(sel, 'params'),
+            paramsType: null,
+            paramsPresent: extractHasAttr(sel, 'params'),
             url: extractString(sel, 'url'),
             path: extractString(sel, 'path'),
             verb: extractString(sel, 'verb'),
@@ -491,7 +636,9 @@
         };
 
         applyFieldType(d, 'value');
+        applyFieldType(d, 'params', PROP);
         applyFieldType(d, 'service');
+        applyFieldType(d, 'adapt', PROP);
 
         return d;
 
@@ -655,10 +802,22 @@
 
         arr = decs.sensors = [];
         var sensors = sel.find("sensor");
+        decs.commands = [];
         sensors.each(function(){
             var sensorDef = extractSensorDef($(this));
             arr.push(sensorDef);
+            if(sensorDef.cmd)
+                decs.commands.push(sensorDef.cmd);
         });
+
+        var commands = sel.find("command");
+        commands.each(function(){
+            var commandDef = extractCommandDef($(this));
+            arr.push(commandDef);
+            if(commandDef.name)
+                decs.commands.push(commandDef.name);
+        });
+
 
         arr = decs.writes = [];
         var writes = sel.find("write");
@@ -696,6 +855,7 @@
         hoists.each(function(){
             var hoistDef = extractWireDef($(this));
             hoistDef.isWire = true;
+            hoistDef.isAlloy = true;
             arr.push(hoistDef);
         });
 
@@ -716,6 +876,8 @@
 
     var MapItem = function() {
 
+        this.cogZone = null;
+        this.aliasZone = null;
         this.origin = null; // hosting cog if this is an alloy
         this.isAlloy = false;
         this.path = null; // local directory
@@ -850,6 +1012,7 @@
         {name: 'valves', method: 'createValve'},
         {name: 'aliases', method: 'createAlias'},
         {name: 'dataSources', method: 'createData'},
+        {name: 'commands', method: 'demandData'},
         {name: 'configs', method: 'createConfig2'},
         {name: 'services', method: 'createService'},
         {name: 'feeds', method: 'createFeed'},
@@ -911,27 +1074,11 @@
     MapItem.prototype._cogBuildDeclarations = function(){
 
         var self = this;
-        var alloys = self.alloys;
         var defs = self._declarationDefs;
-        var j, k, alloy;
 
-        if(defs) {
-
-            //defs.alloys.forEach(function (def) {
-            //    self.createAlloy(def);
-            //});
-
+        if(defs)
             self._cogFirstBuildDeclarations(defs);
 
-            // // build blueprint items of current declaration type from alloys
-            //for(k = 0; k < alloys.length; k++) {
-            //    alloy = alloys[k];
-            //    // alloy is also passed so script methods (run, transform, etc.) can use it as context
-            //    self._cogFirstBuildDeclarations(alloy.defs, alloy);
-            //
-            //}
-
-        }
 
         self.scriptData.init();
 
@@ -941,16 +1088,6 @@
             defs.sensors.forEach(function (def) {
                 self._createSensorFromDef3(def);
             });
-
-            //for(k = 0; k < alloys.length; k++) {
-            //    alloy = alloys[k];
-            //    // alloy is also passed so script methods (run, transform, etc.) can use it as context
-            //    var sensorDefs = alloy.defs.sensors;
-            //    for(j = 0; j < sensorDefs.length; j++){
-            //        var sensorDef = sensorDefs[j];
-            //        self._createSensorFromDef3(sensorDef, alloy);
-            //    }
-            //}
 
             defs.writes.forEach(function (def) {
                 self.createWrite(def);
@@ -971,12 +1108,13 @@
     };
 
 
-
     MapItem.prototype.createLink = function(url, name, data, index, key){
 
         var self = this;
         var mi = new MapItem();
 
+        mi.cogZone = self.cogZone.demandChild();
+        mi.aliasZone = self.aliasZone.demandChild();
         mi.url = url;
         mi.itemData = data;
         mi.itemKey = key;
@@ -990,8 +1128,6 @@
 
         if(self.itemType === DATA) {
             mi.createData({name: name, value: data});
-        } else { // todo add prop type as well
-            mi.createConfig(name, data);
         }
 
         mi._cogDownloadUrl(mi.url);
@@ -1011,6 +1147,9 @@
 
         var self = this;
         var mi = new MapItem();
+
+        mi.cogZone = def.isRoute ? self.cogZone.demandChild(def.name, def.isRoute) : self.cogZone.demandChild();
+        mi.aliasZone = self.aliasZone.demandChild();
 
         mi.config = copyProps(config, {});
         mi.target = def.target;
@@ -1059,6 +1198,8 @@
         var self = this;
         var mi = new MapItem();
 
+        mi.cogZone = self.cogZone.demandChild();
+        mi.aliasZone = self.aliasZone.demandChild();
         mi.isChain = true;
         mi.build = def.build;
         mi.order = def.order;
@@ -1080,7 +1221,7 @@
         mi.targetSel = self.scriptData[mi.target];
 
         var resolvedUrl = this._resolveUrl(def.url, def.path);
-        var urlPlace = bus.at("n-url:"+resolvedUrl);
+        var urlPlace = bus.location("n-url:"+resolvedUrl);
         tryToDownload(resolvedUrl);
         urlPlace.on("done").as(mi).host(mi.uid).run(mi._seekListSource).once().autorun();
         return mi;
@@ -1088,7 +1229,7 @@
     };
 
 
-
+// todo this is called an Alloy now
     MapItem.prototype.createShaft = function(def) {
 
         // url must be cached/loaded at this point
@@ -1099,10 +1240,18 @@
 
         var shaft = new MapItem();
 
+
+        //todo remove alias zones?
+        //shaft.cogZone = self.cogZone.demandChild();
+        shaft.cogZone = def.isRoute ? self.cogZone.demandChild(def.name, def.isRoute) : self.cogZone.demandChild();
+
+        shaft.aliasZone = self.aliasZone.demandChild();
+
         shaft.origin = self; // cog that hosts this alloy
         //shaft.library = url;
         shaft.isAlloy = true;
         shaft.name = def.name;
+        shaft.isRoute = def.isRoute;
 
         // insert shaft between this cog and its parent
         shaft.parent = self.parent;
@@ -1110,6 +1259,9 @@
         delete self.parent.childMap[self.uid];
         self.parent = shaft;
         shaft.childMap[self.uid] = self;
+
+        self.cogZone.insertParent(shaft.cogZone);
+
 
         shaft._cogAssignUrl(def.url);
         shaft._cogBecomeUrl();
@@ -1201,10 +1353,6 @@
 
             if(this.itemType === DATA)
                 this.itemVal.write(this.sourceVal);
-            else if (this.itemType === CONFIG)
-                this.createConfig(this.item, this.sourceVal);
-            else if(this.itemType === PROP)
-                this.scriptData[this.item] = this.sourceVal; // todo add error check for prop collision
             else
                 this.throwError('invalid itemType: ' + this.itemType);
         }
@@ -1242,8 +1390,8 @@
 
         var i;
 
-        if(this.build === 'scratch')
-            destroyInnerMapItems(this);
+        //if(this.build === 'scratch')
+        //    destroyInnerMapItems(this);
 
         var remnantKeyMap = this._generateKeyMapForListDisplay();
         var dataKeyMap = {};
@@ -1275,14 +1423,6 @@
                 entering.push(listItem);
             }
 
-            if(this.order)
-                listItem.localSel.css('order',i);
-
-            if(this.depth)
-                listItem.localSel.css('z-index',i);
-
-            if(this.build === 'sort')
-                this.localSel.append(listItem.localSel);
 
             var isOdd = !!(i & 1);
             listItem.localSel.toggleClass('odd',isOdd);
@@ -1369,7 +1509,7 @@
         var libs = self._declarationDefs.requires;
         libs.forEach(function (def) {
             def.resolvedUrl = self._resolveUrl(def.url, def.path);
-            self._cogAddRequirement(def.resolvedUrl, def.preload, def.name);
+            self._cogAddRequirement(def.resolvedUrl, def.preload, def.name, def.isRoute);
         });
 
         if(self.requirements.length == 0) {
@@ -1461,7 +1601,7 @@
                         var resolvedURL = self._resolveUrl(def.url, def.path);
                         if(self.requirementsSeen[resolvedURL])
                             continue;
-                        newReq = createRequirement(resolvedURL, def.preload, urlReady, def.name);
+                        newReq = createRequirement(resolvedURL, def.preload, urlReady, def.name, def.isRoute);
                         newReqs.push(newReq);
                         self.requirementsSeen[resolvedURL] = newReq;
                     }
@@ -1526,17 +1666,17 @@
 
 
 
-    function createRequirement(requirementUrl, preload, fromUrl, name){
-        var urlPlace = bus.at("n-url:"+requirementUrl);
-        return {url: requirementUrl, fromUrl: fromUrl, place: urlPlace, preload: preload, name: name};
+    function createRequirement(requirementUrl, preload, fromUrl, name, isRoute){
+        var urlPlace = bus.location("n-url:"+requirementUrl);
+        return {url: requirementUrl, fromUrl: fromUrl, place: urlPlace, preload: preload, name: name, isRoute: isRoute};
     }
 
-    MapItem.prototype._cogAddRequirement = function(requirementUrl, preload, name) {
+    MapItem.prototype._cogAddRequirement = function(requirementUrl, preload, name, isRoute) {
 
         //console.log('add: '+ requirementUrl);
         var self = this;
-        var urlPlace = bus.at("n-url:"+requirementUrl);
-        var requirement = {url: requirementUrl, fromUrl: self.resolvedUrl, place: urlPlace, preload: preload, name: name};
+        var urlPlace = bus.location("n-url:"+requirementUrl);
+        var requirement = {url: requirementUrl, fromUrl: self.resolvedUrl, place: urlPlace, preload: preload, name: name, isRoute: isRoute};
 
         self.requirements.push(requirement);
         self.requirementsSeen[requirement.url] = requirement;
@@ -1560,7 +1700,7 @@
     function tryToDownload(url) {
 
 
-        var urlPlace = bus.at("n-url:"+url);
+        var urlPlace = bus.location("n-url:"+url);
         var status = urlPlace.peek("status");
 
         if(status && (status.msg.active || status.msg.done))
@@ -1661,7 +1801,7 @@
 
     function wrapScript(scriptText, url) {
 
-        var website = 'http://www.tlm.com/';
+        var website = 'http://cognition';//http://www.cognition.com/';
         var wrapped =
                 scriptText + "\n//# sourceURL=" + website + url + "";
         return wrapped;
@@ -1690,7 +1830,7 @@
 
         var self = this;
         self._cogAssignUrl(url);
-        var urlPlace = bus.at("n-url:"+ self.resolvedUrl);
+        var urlPlace = bus.location("n-url:"+ self.resolvedUrl);
         tryToDownload(self.resolvedUrl);
         urlPlace.on("done").as(self).host(self.uid).run(self._cogBecomeUrl).once().autorun();
 
@@ -1701,6 +1841,7 @@
         if(this.localSel)
             this.localSel.empty();
     };
+
 
     MapItem.prototype._resolvePath = function(path){
 
@@ -1780,6 +1921,7 @@
 
 
     MapItem.prototype.createAlias = function(def){
+        //var this.aliasZone =
         return this.aliasMap[def.name] = this._resolveUrl(def.url, def.path);
     };
 
@@ -1848,7 +1990,7 @@
             return;
         }
 
-        return sel.sense(eventName);
+        return sel.detect(eventName);
 
     };
 
@@ -1861,6 +2003,8 @@
         var sensor;
         var actualPlaceNames = [];
 
+
+
         if(def.find){
 
             var eventName = def.detect || def.topic;
@@ -1869,22 +2013,24 @@
 
         } else {
 
-
-            for (var i = 0; i < def.watch.length; i++) {
-                dataPlace = mi.find(def.watch[i], def.thing, def.where);
-                if (!def.optional && !dataPlace) {
-                    mi.throwError("Could not build sensor: " + def.thing + ":" + def.watch[0] + ":" + def.where + " in " + mi.resolvedUrl);
-                    return;
-                }
-                if (dataPlace)
-                    actualPlaceNames.push(dataPlace._name);
-            }
+            // todo can rm this? -- checks for data good
+            //
+            //for (var i = 0; i < def.watch.length; i++) {
+            //    dataPlace = mi.find(def.watch[i], def.thing, def.where);
+            //    if (!def.optional && !dataPlace) {
+            //        mi.throwError("Could not build sensor: " + def.thing + ":" + def.watch[i] + ":" + def.where + " in " + mi.resolvedUrl);
+            //        return;
+            //    }
+            //    if (dataPlace)
+            //        actualPlaceNames.push(dataPlace._name);
+            //}
 
             // todo make multiloc upfront and don't search names again
-            if (actualPlaceNames.length === 0)
-                return null; // optional places not found
+            //if (actualPlaceNames.length === 0)
+            //    return null; // optional places not found
 
-            sensor = bus.at(actualPlaceNames).sense(def.topic);
+            sensor = mi.cogZone.findData(def.watch, def.where, def.optional).on(def.topic);
+            //sensor = bus.location(actualPlaceNames).on(def.topic);
         }
 
         var context = mi.scriptData;
@@ -1893,19 +2039,16 @@
             .as(context)
             .host(mi.uid);
 
+        if(def.extract){
+            sensor.extract(def.extract);
+        }
+
+        if(def.adaptPresent){
+            sensor.adapt(this._resolveValueFromType(def.adapt, def.adaptType))
+        }
+
         if(def.change)
             sensor.change(def.change);
-
-
-
-        if (def.transformPresent) {
-            var transformMethod;
-            if (typeof def.transform === 'string' && def.transformType !== STRING) // todo is this precisely correct?
-                transformMethod = context[def.transform]; // method -- or constant value
-            else
-                transformMethod = def.transform;
-            sensor.transform(transformMethod);
-        }
 
         if (def.filter) {
             var filterMethod = context[def.filter];
@@ -1922,18 +2065,47 @@
             sensor.batch();
         }
 
+
+        if(def.transformPresent){
+            sensor.transform(this._resolveValueFromType(def.transform, def.transformType))
+        }
+
+        if(def.emitPresent){
+            sensor.emit(this._resolveValueFromType(def.emit, def.emitType))
+        }
+
         if(def.retain)
             sensor.retain();
+
+        if(def.group && multiSensor) {
+            multiSensor.batch();
+            sensor.group();
+        }
+
+        if(def.keep){
+            if(multiSensor)
+                multiSensor.keep(def.keep);
+            else
+                sensor.keep(def.keep);
+        }
 
         if(def.need && def.need.length > 0)
             sensor.need(def.need);
 
-        if(def.pipe) {
+        if(def.gather && def.gather.length > 0)
+            sensor.gather(def.gather);
+
+        if(def.demand){
+            pipePlace = mi.demandData(def.demand); // todo move all this creation of data point into defs so creation order is same
+            mi.scriptData[def.demand] = pipePlace; // todo replace with exposeProp and check for existence, throw errors
+            sensor.pipe(pipePlace);
+        }
+        else if(def.pipe) {
             pipePlace = mi._find(def.pipe, 'dataMap', def.pipeWhere);
             sensor.pipe(pipePlace);
         }
 
-        if(def.run) {
+        if(def.run && !def.demand && !def.pipe) {
             var callback = context[def.run];
             sensor.run(callback);
         }
@@ -1994,7 +2166,20 @@
             return this._find(name, 'methodMap', where);
     };
 
+
+    //MapItem.prototype._find2 = function(name, map, where) {
+    //
+    //    if(map !== 'dataMap')
+    //        return this._find(name, map, where);
+    //
+    //    return this.cogZone.findData(name, where);
+    //};
+
     MapItem.prototype._find = function(name, map, where) {
+
+
+        if(map === 'dataMap')
+            return this.cogZone.findData(name, where);
 
         where = where || FIRST; // options: local, first, outer, last
 
@@ -2129,7 +2314,8 @@
     };
 
     MapItem.prototype.demandData = function(name){
-        return this.findData(name, LOCAL) || this.createData({name: name});
+        return this.cogZone.demandData(name);
+        //return this.findData(name, LOCAL) || this.createData({name: name});
     };
 
     MapItem.prototype.createConfig = function(name, value){
@@ -2190,6 +2376,13 @@
         if(type === DATA)
             return this.findData(value);
 
+        if(type === READ) {
+            var d = this.findData(value);
+            return function() {
+                return d.read(); // todo  add error handling?
+            }
+        }
+
         if(type === FEED)
             return this.findFeed(value);
 
@@ -2245,7 +2438,8 @@
         if (!inherited)
             value = this._resolveValueFromType(value, type);
 
-        var data = self.dataMap[name] = bus.at("n-data:"+self.uid+":"+name);
+        var data = self.cogZone.demandData(name);
+        //var data = self.dataMap[name] = bus.location("n-data:"+self.uid+":"+name);
 
         if(def.prop){
             if(self.scriptData[def.name])
@@ -2257,7 +2451,16 @@
             data.tag(def.name);
         }
 
-        data.write(value);
+        if(def.adaptPresent){
+            data.adapt(this._resolveValueFromType(def.adapt, def.adaptType))
+        }
+
+        if(def.isRoute){
+            data.route();
+        }
+
+
+        data.initialize(value);
 
         if(def.servicePresent || def.url) {
 
@@ -2268,8 +2471,11 @@
             settings.verb = def.verb || settings.verb || 'GET'; // || global default verb
             settings.params = settings.params || {};
 
-            if(def.params)
-                copyProps(def.params, settings.params);
+
+            if(def.paramsPresent) {
+                var params = this._resolveValueFromType(def.params, def.paramsType) || {};
+                copyProps(params, settings.params);
+            }
 
             var service = new WebService();
             service.init(settings, self, data);
@@ -2497,12 +2703,15 @@
             .done(function(response, status, xhr ){
 
                 self._location.write(response);
+                self._location.write(response, 'done');
+                self._location.write(response, 'always');
                 self._location.write(status, 'status');
 
             })
             .fail(function(xhr, status, error){
 
                 self._location.write(error, 'error');
+                self._location.write(error, 'always');
                 self._location.write(status, 'status');
 
             })
@@ -2533,7 +2742,7 @@
 
         feed._mapItem = mi;
         feed._name = def.name;
-        feed._feedPlace = bus.at("n-feed:" + mi.uid + ":"+ def.name);
+        feed._feedPlace = bus.location("n-feed:" + mi.uid + ":"+ def.name);
         feed._dataPlace = mi.demandData(dataName);
         feed._params = null;
         feed._primed = false; // once a request is made, executed on next js frame to allow easy batching, avoid multiple calls
