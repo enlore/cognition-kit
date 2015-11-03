@@ -65,8 +65,8 @@ Add more javascript and css dependencies in the `vendor/js` and `vendor/css`
 directories, and gulp will copy them over.  If they don't copy right when you
 drop them in, restart the gulp process.
 
-Everything ends up in `dist`, which serves as the webservers serve root from which
-all your files will be served, so write your html `src` attributes accordingly.
+Everything ends up in `dist`, which is configured to be the webserver's
+webroot, so write your paths to web resources accordingly.
 
 This boilerplate places your app files (cogs) in the `dist/app` directory. See this
 line:
