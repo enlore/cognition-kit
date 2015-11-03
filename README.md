@@ -75,4 +75,5 @@ line:
 
 After loading in cognition, the `cognition.init()` method takes a jQuery selection
 and a path.  The path, that second arg, references the app's entry point, the
-first ancestor cog, the genesis cog, the progenitor.
+first ancestor cog, the genesis cog, the progenitor cog. It's an absolute path
+that points to `PROJECT_ROOT/dist/app/index.html`.
