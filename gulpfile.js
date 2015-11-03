@@ -1,10 +1,12 @@
 "use strict";
 /* jshint laxcomma: true */
 require("colors");
-var gulp          = require("gulp");
-var gChmod        = require("gulp-chmod");
-var gWeb          = require("gulp-connect");
-var gPref         = require("gulp-autoprefixer");
+var gulp                = require("gulp");
+var gChmod              = require("gulp-chmod");
+var gWeb                = require("gulp-connect");
+//const gPost             = require("gulp-postcss");
+const autoprefixer      = require("gulp-html-autoprefixer");
+//var gPref         = require("gulp-autoprefixer");
 //var gIf           = require("gulp-if");
 
 const config = {
@@ -18,6 +20,10 @@ const config = {
 
 const paths = {
     src: { // src files if working with transcompiled stuff
+        root: "src/**/*",
+        html: "src/**/*.html",
+        app: "src/app/**/*",
+        layout: "src/index.html"
     },
 
     vendor: { // vendors stuff/lib/dependencies
@@ -45,10 +51,19 @@ const tasks = ["vendorJs", "vendorCss", "serve", "watch"]
 if (config.autoprefix) {
     tasks.push("autoprefix")
 
+    const autoprefixConfig = {
+        browsers: ["IE 8", "IE 11", "last 3 versions"],
+        add: true,
+        remove: true,
+        cascade: true
+    }
+
     gulp.task("autoprefix", function () {
-        gulp.src(paths.src)
-            .pipe(gPref(autoprefixConfig))
-            .pipe(paths.dest.root)
+        const autopref = autoprefixer(autoprefixConfig)
+
+        gulp.src(paths.src.html)
+            .pipe(autopref)
+            .pipe(gulp.dest(paths.dest.root));
     })
 }
 
@@ -67,6 +82,10 @@ gulp.task("watch",  function () {
 
     if (config.server.reload) {
         gulp.watch(paths.dest.root, ["reload"])
+    }
+
+    if (config.autoprefix) {
+        gulp.watch(paths.src.html, ["autoprefix"])
     }
 
 })
