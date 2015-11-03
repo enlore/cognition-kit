@@ -10,24 +10,41 @@ Unzip it, and move down into its newly created directory.
 
 Then, from a shell/command prompt opened up in that same dir:
 
+    # if you haven't already, install gulp globally
+    sudo npm install --global gulp
+
+    # next, install the dependencies for the project
     npm install
+
+    # finally, run the project
     gulp
 
 Now gulp is serving your SPA at [localhost:3000](http://localhost:3000).
 
-Hack on the stuff in `public` and make a totally sweet, game changing app or whatever.
+Hack on the stuff in `src` and make a totally sweet, game changing app or whatever.
 
 ## Optionally
 
-Pass things via env vars:
+This build file responds to several options.
 
-    PORT=4000 gulp
+```sh
+    # defaults are given here
 
-Now gulp is serving your project at [localhost:4000](http://localhost:4000). UH mazing.
+    PORT=3000     # switch up the port you'd like to bind to
+    RELOAD=true   # turn livereload on or off by passing "true" or "false"
+    PREFIX=false  # enable inline css prefixing via the html-autoprefixer postcss module
+
+    # Running the project on port 4002 with autoprefixing enabled looks like this:
+    PORT=4002 PREFIX=true gulp
+
+```
+
+Now gulp is serving your project at [localhost:4002](http://localhost:4002) and
+handling some browser compatability crap for you. UH mazing.
 
 ## Fun for the Whole Family
 
-You got Chrome? No? Do that.
+Go install Chrome, then get this livereload extension thing.
 
 Ok, now try this [livereload extension](https://chrome.google.com/webstore/detail/livereload/jnihajbhpnppcggbcgedagnkighmdlei?hl=en).
 All it does is inject a spot of javascript into your page (when it's turned on)
@@ -39,16 +56,17 @@ enabled, so use it!
 
 ## Going Forward
 
-Drop a `css`, `img`, `assets`, whatever directory in `public` and put things in
-them. There's no magic involved in building out the `.html` files, so you'll
-have to add the appropriate markup (in your `index.html` file, or wherever)
-to reference your various static assets.
+Drop a `css`, `img`, `assets`, whatever directory in `dist` and put things in
+them. Add app files (or cogs, i.e. `.html` files) in `src/app`.
 
 Add more javascript and css dependencies in the `vendor/js` and `vendor/css`
 directories, and gulp will copy them over.  If they don't copy right when you
 drop them in, restart the gulp process.
 
-This boilerplate places your app files (cogs) in the `public/app` directory. See this
+Everything ends up in `dist`, which serves as the webservers serve root from which
+all your files will be served, so write your html `src` attributes accordingly.
+
+This boilerplate places your app files (cogs) in the `dist/app` directory. See this
 line:
 
     <script>$.cognition.init($("#cog-root"), "/app/index.html");</script>

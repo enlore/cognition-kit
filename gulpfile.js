@@ -4,10 +4,9 @@ require("colors");
 var gulp                = require("gulp");
 var gChmod              = require("gulp-chmod");
 var gWeb                = require("gulp-connect");
-//const gPost             = require("gulp-postcss");
+
 const autoprefixer      = require("gulp-html-autoprefixer");
-//var gPref         = require("gulp-autoprefixer");
-//var gIf           = require("gulp-if");
+const gIf               = require("gulp-if");
 
 const config = {
     permissionBits: 664,
@@ -44,30 +43,26 @@ const webServerConfig = {
     port: config.server.port,
     livereload: config.server.reload,
     root: paths.dest.root
-};
-
-const tasks = ["vendorJs", "vendorCss", "serve", "watch"]
-
-if (config.autoprefix) {
-    tasks.push("autoprefix")
-
-    const autoprefixConfig = {
-        browsers: ["IE 8", "IE 11", "last 3 versions"],
-        add: true,
-        remove: true,
-        cascade: true
-    }
-
-    gulp.task("autoprefix", function () {
-        const autopref = autoprefixer(autoprefixConfig)
-
-        gulp.src(paths.src.html)
-            .pipe(autopref)
-            .pipe(gulp.dest(paths.dest.root));
-    })
 }
 
+const autoprefixConfig = {
+    browsers: ["IE 8", "IE 11", "last 3 versions"],
+    add: true,
+    remove: true,
+    cascade: true
+}
+
+const tasks = ["vendorJs", "vendorCss", "appFiles", "serve", "watch"]
+
 gulp.task("default", tasks);
+
+gulp.task("appFiles", function () {
+    const autopref = autoprefixer(autoprefixConfig)
+
+    gulp.src(paths.src.html)
+        .pipe(gIf(config.autoprefix, autopref)) // conditionally do autoprefixing of inline css in html files
+        .pipe(gulp.dest(paths.dest.root));
+})
 
 if (config.server.reload) {
     gulp.task("reload", function () {
@@ -77,16 +72,14 @@ if (config.server.reload) {
 }
 
 gulp.task("watch",  function () {
-    gulp.watch(paths.vendor.js, ["vendorJs"]);
-    gulp.watch(paths.vendor.css, ["vendorCss"]);
+    gulp.watch(paths.vendor.js,     ["vendorJs"]);
+    gulp.watch(paths.vendor.css,    ["vendorCss"]);
+    gulp.watch(paths.src.html,      ["appFiles"])
 
     if (config.server.reload) {
         gulp.watch(paths.dest.root, ["reload"])
     }
 
-    if (config.autoprefix) {
-        gulp.watch(paths.src.html, ["autoprefix"])
-    }
 
 })
 
