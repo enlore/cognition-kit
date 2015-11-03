@@ -1,0 +1,23 @@
+<blueprint>
+  <data name="config" value="prop config"></data>
+  <sensor watch="config" run="showVersion" auto="true"></sensor>
+</blueprint>
+
+<display>
+  <h1>Here's the app</h1>
+  <div id="versionstring"></div>
+</display>
+
+<script>
+  $.cog({
+    init: function init () {},
+
+    showVersion: function (config) {
+      this.versionstring.text(config.version);
+    },
+
+    config: {
+      version: "0.0.1"
+    }
+  })
+</script>

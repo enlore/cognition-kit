@@ -4,10 +4,12 @@ require("colors");
 var gulp          = require("gulp");
 var gChmod        = require("gulp-chmod");
 var gWeb          = require("gulp-connect");
+var gPref         = require("gulp-autoprefixer");
 //var gIf           = require("gulp-if");
 
 const config = {
     permissionBits: 664,
+    autoprefix: process.env.PREFIX === "true" ? true : false,
     server: {
         reload: process.env.RELOAD === "false" ? false : true,
         port: process.env.PORT || 3000
@@ -26,8 +28,8 @@ const paths = {
     dest: { // output dirs
         root: "dist",
         vendor: {
-            js: "public/js/vendor",
-            css: "public/css/vendor"
+            js: "dist/js/vendor",
+            css: "dist/css/vendor"
         }
     }
 }
@@ -40,8 +42,17 @@ const webServerConfig = {
 
 const tasks = ["vendorJs", "vendorCss", "serve", "watch"]
 
-gulp.task("default", tasks);
+if (config.autoprefix) {
+    tasks.push("autoprefix")
 
+    gulp.task("autoprefix", function () {
+        gulp.src(paths.src)
+            .pipe(gPref(autoprefixConfig))
+            .pipe(paths.dest.root)
+    })
+}
+
+gulp.task("default", tasks);
 
 if (config.server.reload) {
     gulp.task("reload", function () {
