@@ -5,10 +5,15 @@ Doing Occam proud.
 
 ## Use It
 
+_First, dig it out of_ `node_modules/cognition-kit`. Assuming you're in your app
+dir with a shell, maybe do a `cp -r node_modules/cognition-kit/* .`. Then you
+can follow the directions below.
+
+I'm working on a solution to make that process automatic.  Check back later.
+
 Download the [latest release](https://github.com/enlore/cognition-vanilla/releases).
 Unzip it, and move down into its newly created directory.
 
-__Of note: I'll be automating the process of pulling the most recent cognition soon.__
 
 Then, from a shell/command prompt opened up in that same dir:
 
