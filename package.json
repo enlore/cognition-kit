@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
+  "author": "enlore",
   "license": "ISC",
   "devDependencies": {
     "colors": "^1.1.2",
@@ -19,5 +19,9 @@
     "gulp-postcss": "^6.0.1",
     "gulp-webserver": "^0.9.1",
     "html-autoprefixer": "^0.3.7"
+  },
+  "dependencies": {
+    "catbus": "^2.0.5",
+    "cognition-framework": "^1.0.7"
   }
 }

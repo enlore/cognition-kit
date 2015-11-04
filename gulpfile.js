@@ -26,7 +26,7 @@ const paths = {
     },
 
     vendor: { // vendors stuff/lib/dependencies
-        js: ["vendor/js/**/*.js"],
+        js: ["vendor/js/**/*.js", "node_modules/cognition-framework/dist/cognition.js", "node_modules/catbus/src/catbus.js"],
         css: ["vendor/css/**/*.css"]
     },
 
