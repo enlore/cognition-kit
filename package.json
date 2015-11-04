@@ -1,13 +1,27 @@
 {
-  "name": "cognition-vanilla",
-  "version": "1.0.0",
-  "description": "Doing Occam proud.",
-  "main": "index.js",
+  "name": "cognition-kit",
+  "version": "2.0.2",
+  "description": "cognition-framework boilerplate. Easy as bisquick.",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "enlore",
-  "license": "ISC",
+  "author": "enlore <n.e.lorenson@gmail.com>",
+  "repository": {
+      "type": "git",
+      "url": "https://github.com/enlore/cognition-kit"
+  },
+  "bugs": {
+    "url": "https://github.com/enlore/cognition-kit/issues"
+  },
+  "license": "Apache 2.0",
+  "keywords": [
+      "cognition-framework",
+      "boiler",
+      "boiler plate",
+      "template",
+      "starter project",
+      "starter kit"
+  ],
   "devDependencies": {
     "colors": "^1.1.2",
     "gulp": "^3.9.0",
