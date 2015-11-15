@@ -7,20 +7,20 @@
   },
   "author": "enlore <n.e.lorenson@gmail.com>",
   "repository": {
-      "type": "git",
-      "url": "https://github.com/enlore/cognition-kit"
+    "type": "git",
+    "url": "https://github.com/enlore/cognition-kit"
   },
   "bugs": {
     "url": "https://github.com/enlore/cognition-kit/issues"
   },
   "license": "Apache-2.0",
   "keywords": [
-      "cognition-framework",
-      "boiler",
-      "boiler plate",
-      "template",
-      "starter project",
-      "starter kit"
+    "cognition-framework",
+    "boiler",
+    "boiler plate",
+    "template",
+    "starter project",
+    "starter kit"
   ],
   "devDependencies": {
     "colors": "^1.1.2",
@@ -32,7 +32,8 @@
     "gulp-if": "^2.0.0",
     "gulp-postcss": "^6.0.1",
     "gulp-webserver": "^0.9.1",
-    "html-autoprefixer": "^0.3.7"
+    "html-autoprefixer": "^0.3.7",
+    "postcss-import": "^7.1.2"
   },
   "dependencies": {
     "catbus": "^2.0.5",
