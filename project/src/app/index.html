@@ -1,18 +1,12 @@
 <blueprint>
-  <data name="config" value="prop config"></data>
-  <sensor watch="config" run="showVersion" auto="true"></sensor>
+    <data name="config" value="prop configObj" />
+
+    <cog find="versionContainer" url="versionShower.html" />
 </blueprint>
 
 <display>
-    <div style="display: flex;">
-        <div style="flex: 1 1 auto;">
-            <h1>Here's the app</h1>
-        </div>
-
-        <div style="flex: 1 1 auto;">
-            <div id="versionstring"></div>
-        </div>
-    </div>
+    <h1>Here's your app</h1>
+    <div id="versionContainer"></div>
 </display>
 
 <script>
@@ -23,8 +17,8 @@
       this.versionstring.text(config.version);
     },
 
-    config: {
-      version: "0.0.1"
+    configObj: {
+      version: "1.0.0"
     }
   })
 </script>

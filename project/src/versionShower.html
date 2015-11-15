@@ -1,0 +1,15 @@
+<blueprint>
+    <sensor watch="config" run="vendor" auto="true" />
+</blueprint>
+
+<script>
+    $.cog({
+        render: function (config) {
+            this.versionTag.text(config.version)
+        }
+    })
+</script>
+
+<display>
+    <h2 id="versionTag"></h2>
+</display>
