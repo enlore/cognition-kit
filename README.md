@@ -15,6 +15,19 @@ to the command `setup`, so
 and you'll be off to the races. You can install `cognition-kit` globally and use
 it, too.
 
+    npm install -g cognition-kit
+    kit setup
+    npm install
+    gulp
+
+This `kit` tool will populate your current working directory and populate it with
+the boilerplate directories and files for a new `gulp` powered Cognition project.
+
+### Coming Soon
+
+* Pass a path like so: `kit setup path/to/project_root`, and populate the boilerplate there.
+* Automatically install the project dependencies with `npm`'s programmatic interface
+
 ## Optionally
 
 This build file responds to several options.
