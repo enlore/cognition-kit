@@ -1,7 +1,7 @@
-# Cognition Starter Pack
-## Razor Edition
+# Cognition Starter Kit
+## Professional Edition
 
-Doing Occam proud.
+__Cause we're professionals.__
 
 ## Use It
 
