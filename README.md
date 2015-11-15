@@ -1,13 +1,13 @@
 # Cognition Starter Kit
 ## Professional Edition
 
-__Cause we're professionals.__
+_Cause we're professionals._
 
 ## Use It
 
 Install `gulp` globally first.
 
-    `npm install -g gulp`
+    npm install -g gulp
 
 This boilerplate project ships with a little cli app that currently responds
 to the command `setup`, so
