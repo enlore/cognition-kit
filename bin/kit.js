@@ -3,6 +3,7 @@
 "use strict"
 require("colors")
 const path          = require("path")
+    , exec          = require("child_process").exec
 
 const commander     = require("commander")
     , ncp           = require("ncp")
@@ -19,7 +20,29 @@ commander
 
         ncp(localTree, projectRoot, (err) => {
             if (err) throw err
-            console.log("Alright, now make something cool.".blue)
+            console.log("~~~~~~ _ > Time to install the dependencies".green)
+
+            const npmInstall = exec("npm install")
+
+            npmInstall
+                .stderr.pipe(process.stderr)
+
+            npmInstall
+                .stdout.pipe(process.stdout)
+
+            npmInstall.on("exit", (exitCode, sigName) => {
+                if (exitCode === 0) {
+                    console.log("~~~~~~ _ > Alright, now make something cool.".blue)
+                } else {
+                    let msg = "Non zero exit code: " + exitCode
+                    console.log(msg.red)
+                }
+
+                if (sigName) {
+                    let msg = "Stopped by a terminal signal: " + sigName
+                    console.log(msg.orange)
+                }
+            })
         })
     })
 
