@@ -5,30 +5,14 @@ Doing Occam proud.
 
 ## Use It
 
-_First, dig it out of_ `node_modules/cognition-kit`. Assuming you're in your app
-dir with a shell, maybe do a `cp -r node_modules/cognition-kit/* .`. Then you
-can follow the directions below.
+This boilerplate project ships with a little cli app that currently responds
+to the command `setup`, so
 
-I'm working on a solution to make that process automatic.  Check back later.
-
-Download the [latest release](https://github.com/enlore/cognition-vanilla/releases).
-Unzip it, and move down into its newly created directory.
-
-
-Then, from a shell/command prompt opened up in that same dir:
-
-    # if you haven't already, install gulp globally
-    sudo npm install --global gulp
-
-    # next, install the dependencies for the project
+    node_modules/cognition-kit/bin/kit setup
     npm install
-
-    # finally, run the project
     gulp
 
-Now gulp is serving your SPA at [localhost:3000](http://localhost:3000).
-
-Hack on the stuff in `src` and make a totally sweet, game changing app or whatever.
+and you'll be off to the races.
 
 ## Optionally
 

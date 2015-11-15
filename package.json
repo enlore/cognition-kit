@@ -1,6 +1,6 @@
 {
   "name": "cognition-kit",
-  "version": "2.0.4",
+  "version": "2.1.0",
   "description": "cognition-framework boilerplate. Easy as bisquick.",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -22,23 +22,9 @@
     "starter project",
     "starter kit"
   ],
-  "devDependencies": {
-    "colors": "^1.1.2",
-    "gulp": "^3.9.0",
-    "gulp-autoprefixer": "^3.1.0",
-    "gulp-chmod": "^1.2.0",
-    "gulp-connect": "^2.2.0",
-    "gulp-html-autoprefixer": "0.0.1",
-    "gulp-if": "^2.0.0",
-    "gulp-postcss": "^6.0.1",
-    "gulp-webserver": "^0.9.1",
-    "html-autoprefixer": "^0.3.7",
-    "postcss-import": "^7.1.2"
-  },
   "dependencies": {
-    "catbus": "^2.0.5",
-    "cognition-framework": "^1.0.7",
     "colors": "^1.1.2",
+    "commander": "^2.9.0",
     "ncp": "^2.0.0"
   }
 }
