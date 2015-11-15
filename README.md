@@ -13,7 +13,6 @@ This boilerplate project ships with a little cli app that currently responds
 to the command `setup`, so
 
     ./node_modules/cognition-kit/bin/kit.js setup
-    npm install
     gulp
 
 and you'll be off to the races. You can install `cognition-kit` globally and use
@@ -21,16 +20,16 @@ it, too.
 
     npm install -g cognition-kit
     kit setup
-    npm install
     gulp
 
-This `kit` tool will populate your current working directory with
-the boilerplate directories and files for a new `gulp` powered Cognition project.
+This `kit` tool will populate your current working directory with the
+boilerplate directories and files for a new `gulp` powered Cognition project,
+and it will use `child_process.exec` to run `npm install`, pulling down the
+project's dependencies.
 
 ### Coming Soon
 
 * Pass a path like so: `kit setup path/to/project_root`, and populate the boilerplate there.
-* Automatically install the project dependencies with `npm`'s programmatic interface
 
 ## Optionally
 
