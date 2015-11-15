@@ -8,10 +8,11 @@ const path          = require("path")
 const commander     = require("commander")
     , ncp           = require("ncp")
 
+commander.version(require("../package.json").version)
+
 commander
-    .version(require("../package.json").version)
-    .command("setup", "Set up directory structure and files, pull down deps via npm")
-    .option("-s, --stanky", "Set the stank level")
+    .command("setup")
+    .description("Set up directory structure and files, pull down deps via npm")
     .action((cmd, opts) => {
         const projectRoot = path.resolve(process.cwd()) // dump it wherever the script is called from
         const localTree   = path.resolve(__dirname, "..", "project")
@@ -46,7 +47,6 @@ commander
         })
     })
 
-commander
-    .parse(process.argv)
+commander.parse(process.argv)
 
 if (commander.args.length === 0) commander.help()
