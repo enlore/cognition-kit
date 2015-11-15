@@ -12,7 +12,7 @@ Install `gulp` globally first.
 This boilerplate project ships with a little cli app that currently responds
 to the command `setup`, so
 
-    node_modules/cognition-kit/bin/kit setup
+    ./node_modules/cognition-kit/bin/kit.js setup
     npm install
     gulp
 
