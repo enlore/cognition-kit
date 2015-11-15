@@ -1,9 +1,12 @@
 {
   "name": "cognition-kit",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "description": "cognition-framework boilerplate. Easy as bisquick.",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "engines": {
+    "node": ">=4.0.0"
   },
   "bin": {
     "kit": "./bin/kit.js"

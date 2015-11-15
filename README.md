@@ -5,6 +5,8 @@ _Cause we're professionals._
 
 ## Use It
 
+__Note:__ You'll need to have `node >=4.0.0`.
+
 Install `gulp` globally first.
 
     npm install -g gulp
