@@ -10,7 +10,7 @@ const commander     = require("commander")
 
 commander
     .version(require("../package.json").version)
-    .command("setup")
+    .command("setup", "Set up directory structure and files, pull down deps via npm")
     .option("-s, --stanky", "Set the stank level")
     .action((cmd, opts) => {
         const projectRoot = path.resolve(process.cwd()) // dump it wherever the script is called from
@@ -48,3 +48,5 @@ commander
 
 commander
     .parse(process.argv)
+
+if (commander.args.length === 0) commander.help()
