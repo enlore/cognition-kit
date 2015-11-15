@@ -5,6 +5,9 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "bin": {
+    "kit": "./bin/kit.js"
+  },
   "author": "enlore <n.e.lorenson@gmail.com>",
   "repository": {
     "type": "git",

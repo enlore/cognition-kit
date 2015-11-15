@@ -12,7 +12,8 @@ to the command `setup`, so
     npm install
     gulp
 
-and you'll be off to the races.
+and you'll be off to the races. You can install `cognition-kit` globally and use
+it, too.
 
 ## Optionally
 
