@@ -37,6 +37,8 @@
   },
   "dependencies": {
     "catbus": "^2.0.5",
-    "cognition-framework": "^1.0.7"
+    "cognition-framework": "^1.0.7",
+    "colors": "^1.1.2",
+    "ncp": "^2.0.0"
   }
 }
