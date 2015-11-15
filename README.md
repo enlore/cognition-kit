@@ -5,6 +5,10 @@ Doing Occam proud.
 
 ## Use It
 
+Install `gulp` globally first.
+
+    `npm install -g gulp`
+
 This boilerplate project ships with a little cli app that currently responds
 to the command `setup`, so
 
@@ -20,7 +24,7 @@ it, too.
     npm install
     gulp
 
-This `kit` tool will populate your current working directory and populate it with
+This `kit` tool will populate your current working directory with
 the boilerplate directories and files for a new `gulp` powered Cognition project.
 
 ### Coming Soon
@@ -35,9 +39,10 @@ This build file responds to several options.
 ```sh
     # defaults are given here
 
-    PORT=3000     # switch up the port you'd like to bind to
-    RELOAD=true   # turn livereload on or off by passing "true" or "false"
-    PREFIX=false  # enable inline css prefixing via the html-autoprefixer postcss module
+    PORT=3000             # switch up the port you'd like to bind to
+    RELOAD=true           # turn livereload on or off by passing "true" or "false"
+    PREFIX=false          # enable inline css prefixing via the html-autoprefixer postcss module
+    IMPORT_CSS=false      # use post css to parse @import directives
 
     # Running the project on port 4002 with autoprefixing enabled looks like this:
     PORT=4002 PREFIX=true gulp
@@ -76,7 +81,7 @@ line:
 
     <script>$.cognition.init($("#cog-root"), "/app/index.html");</script>
 
-After loading in cognition, the `cognition.init()` method takes a jQuery selection
+After loading in Cognition, the `cognition.init()` method takes a jQuery selection
 and a path.  The path, that second arg, references the app's entry point, the
 first ancestor cog, the genesis cog, the progenitor cog. It's an absolute path
 that points to `PROJECT_ROOT/dist/app/index.html`.
