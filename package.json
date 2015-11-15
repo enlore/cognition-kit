@@ -1,6 +1,6 @@
 {
   "name": "cognition-kit",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "description": "cognition-framework boilerplate. Easy as bisquick.",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

@@ -12,8 +12,8 @@ commander
     .command("setup")
     .option("-s, --stanky", "Set the stank level")
     .action((cmd, opts) => {
-        const projectRoot = path.resolve(process.cwd())
-        const localTree   = path.resolve(process.cwd(), "node_modules", "cognition-kit", "project")
+        const projectRoot = path.resolve(process.cwd()) // dump it wherever the script is called from
+        const localTree   = path.resolve(__dirname, "..", "project")
 
         console.log()
 
