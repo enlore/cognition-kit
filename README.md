@@ -3,6 +3,10 @@
 
 _Cause we're professionals._
 
+This is simple boilerplate and build system that will generate a project structure
+on which you can build a frontend app powered by the
+[cognition-framework](https://www.npmjs.com/package/cognition-framework).
+
 ## Use It
 
 __Note:__ You'll need to have `node >=4.0.0`.
@@ -32,6 +36,8 @@ project's dependencies.
 ### Coming Soon
 
 * Pass a path like so: `kit setup path/to/project_root`, and populate the boilerplate there.
+* A cog stub generator thing, so you can `kit cog path/of/new/cog.html` and save some keystrokes.
+* You know, docs.
 
 ## Optionally
 
@@ -77,12 +83,26 @@ drop them in, restart the gulp process.
 Everything ends up in `dist`, which is configured to be the webserver's
 webroot, so write your paths to web resources accordingly.
 
-This boilerplate places your app files (cogs) in the `dist/app` directory. See this
-line:
+The build system copies your app files (cogs) into the `dist/app` directory
+as you hack on them.  See this line in the root `index.html` file:
 
-    <script>$.cognition.init($("#cog-root"), "/app/index.html");</script>
+    <script>$.cognition.init($("#cog-root"), "/app/app.html");</script>
 
 After loading in Cognition, the `cognition.init()` method takes a jQuery selection
 and a path.  The path, that second arg, references the app's entry point, the
 first ancestor cog, the genesis cog, the progenitor cog. It's an absolute path
 that points to `PROJECT_ROOT/dist/app/index.html`.
+
+## If It Doesn't Work
+
+The docs for the cognition-framework don't exist? Quite yet? Bear with us,
+we're making them.
+
+In the mean time, feel free to hit me up on the innerbeb:
+[@enlore](https://twitter.com/enlore), my github's
+[enlore](https://github.com/enlore), I'm on the NashDev slack as enlore, or
+just email me at [n.e.lorenson@gmail.com](mailto:n.e.lorenson@gmail.com).
+
+You can ask about this boilerplate kit, about the framework itself, whatever
+you're feeling. I'll do my best to point you in the right direction.
+
